@@ -64,7 +64,9 @@ cvs.addEventListener("click", function(evt){
                 pipes.reset();
                 bird.speedReset();
                 score.reset();
+                money.reset();
                 state.current = state.getReady;
+                frames = 0;
             }
             break;
     }
@@ -111,7 +113,44 @@ const fg = {
         }
     }
 }
+const money = {
+    position:[],
+    sX: 310,
+    sY : 112,
+    w: 45,
+    h: 45,
+    rotation:90,
+    draw: function(){
+        for(let i  = 0; i < this.position.length; i++){
+            let p = this.position[i];
+            ctx.drawImage(sprite, this.sX, this.sY, this.w, this.h, p.x, p.y , this.w, this.h);
+        }
+    }, 
+    update: function(){
+        if(state.current !== state.game) return;
+        if(frames%(200) == 0){
+            this.position.push({
+                x : 250,
+                y : 80 + ( Math.random() * 50) ,
+            });
+        }
+        for(let i = 0; i < this.position.length; i++){
+            let p = this.position[i];
+            p.x -= 2;
+            if(bird.x + bird.radius > p.x && bird.x + bird.radius < p.x + this.w && bird.y + bird.radius > p.y && bird.y + bird.radius < p.y +this.h){
+                score.value += 1;
+                this.position.shift();
+            }
+            if(p.x + this.w <= 0){
+                this.position.shift();
+            }
+        }
+    },
+    reset : function(){
+        this.position = [];
+    }
 
+}
 // BIRD
 const bird = {
     animation : [
@@ -336,14 +375,15 @@ const score= {
 function draw(){
     ctx.fillStyle = "#70c5ce";
     ctx.fillRect(0, 0, cvs.width, cvs.height);
-    
     bg.draw();
     pipes.draw();
     fg.draw();
     bird.draw();
+    money.draw();
     getReady.draw();
     gameOver.draw();
     score.draw();
+    
 }
 
 // UPDATE
@@ -351,6 +391,7 @@ function update(){
     bird.update();
     fg.update();
     pipes.update();
+    money.update();
 }
 
 // LOOP
